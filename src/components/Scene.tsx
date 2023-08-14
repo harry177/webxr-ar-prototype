@@ -31,7 +31,7 @@ export const Scene: React.FC = () => {
       );
       cameraRef.current = camera;
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(container.clientWidth, container.clientHeight);
       rendererRef.current = renderer;
       
@@ -153,7 +153,9 @@ export const Scene: React.FC = () => {
         isDraggingRef.current = false;
       };
 
-      animate();
+      renderer.setAnimationLoop(() => {
+        animate();
+      });
 
       container.addEventListener("mousedown", handleMouseDown);
       container.addEventListener("mousemove", handleMouseMove);
@@ -180,7 +182,7 @@ export const Scene: React.FC = () => {
       const { current: camera } = cameraRef;
 
       if (renderer && scene && camera) {
-        animationFrameId = requestAnimationFrame(animate);
+        renderer.setAnimationLoop(animate);
         renderer.render(scene, camera);
       }
     };
