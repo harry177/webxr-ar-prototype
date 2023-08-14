@@ -34,11 +34,11 @@ export const Scene: React.FC = () => {
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(container.clientWidth, container.clientHeight);
       rendererRef.current = renderer;
+      
+      renderer.xr.enabled = true;
 
       const arButton = ARButton.createButton(renderer);
       document.body.appendChild(arButton);
-
-      renderer.xr.enabled = true;
 
       container.appendChild(renderer.domElement);
 
