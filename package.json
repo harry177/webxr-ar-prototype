@@ -20,10 +20,13 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && npm run build:server",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server": "ts-node server/server.ts"
+    "server": "ts-node server/server.ts",
+    "build:server": "tsc --outDir dist/server",
+    "postinstall": "tsc",
+    "heroku-postbuild": "npm run build"
   },
   "eslintConfig": {
     "extends": [
