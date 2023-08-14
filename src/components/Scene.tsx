@@ -38,6 +38,8 @@ export const Scene: React.FC = () => {
       const arButton = ARButton.createButton(renderer);
       document.body.appendChild(arButton);
 
+      renderer.xr.enabled = true;
+
       container.appendChild(renderer.domElement);
 
       const geometry = new THREE.BoxGeometry();
