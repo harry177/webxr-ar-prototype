@@ -44,7 +44,8 @@ export const Scene: React.FC = () => {
       const geometry = new THREE.BoxGeometry();
       const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
       const cube = new THREE.Mesh(geometry, material);
-      cube.position.set(0, 0, -1.5);
+      cube.scale.set(0.5, 0.5, 0.5);
+      cube.position.set(0, 0, -2.5);
       cubeRef.current = cube;
 
       //scene.add(cube);
