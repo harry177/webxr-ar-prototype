@@ -36,7 +36,9 @@ export const Scene: React.FC = () => {
 
       const arButton = ARButton.createButton(renderer);
 
-      arButton.addEventListener("sessionstart", () => {
+      const session = renderer.xr.getSession();
+
+      session && session.addEventListener("start", () => {
         const geometry = new THREE.BoxGeometry();
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         const cube = new THREE.Mesh(geometry, material);
@@ -48,7 +50,7 @@ export const Scene: React.FC = () => {
         renderer.setAnimationLoop(animate);
       });
 
-      arButton.addEventListener("sessionend", () => {
+      session && session.addEventListener("end", () => {
         scene.remove(cubeRef.current!);
         cubeRef.current = null;
 
