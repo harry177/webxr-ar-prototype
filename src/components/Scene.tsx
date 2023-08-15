@@ -83,9 +83,9 @@ export const Scene: React.FC = () => {
 
           renderer.render(scene, camera);
         }
+        renderer.setAnimationLoop(animate);
       }
-
-      animationFrameId = requestAnimationFrame(animate);
+      
     };
 
     init();
