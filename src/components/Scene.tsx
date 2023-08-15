@@ -37,26 +37,30 @@ export const Scene: React.FC = () => {
       rendererRef.current = renderer;
 
       renderer.xr.enabled = true;
-      renderer.xr.setReferenceSpaceType('local');
 
       const arButton = ARButton.createButton(renderer);
 
       arButton.addEventListener("sessionstart", () => {
         setSessionActive(true);
+
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.set(0, 0, -0.5);
+        cubeRef.current = cube;
+
+        scene.add(cube);
       });
+
       arButton.addEventListener("sessionend", () => {
         setSessionActive(false);
+        scene.remove(cubeRef.current!);
+        cubeRef.current = null;
       });
 
       document.body.appendChild(arButton);
 
       container.appendChild(renderer.domElement);
-
-      const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-      const cube = new THREE.Mesh(geometry, material);
-      cube.position.set(0, 0, -0.5);
-      cubeRef.current = cube;
 
       camera.position.z = 5;
 
@@ -72,22 +76,20 @@ export const Scene: React.FC = () => {
 
       if (renderer && scene && camera) {
         if (sessionActive) {
-          renderer.setAnimationLoop(null);
-
           if (cube) {
             cube.rotation.x += 0.01;
             cube.rotation.y += 0.01;
           }
 
           renderer.render(scene, camera);
-        } else {
-          renderer.setAnimationLoop(animate);
         }
       }
+
+      animationFrameId = requestAnimationFrame(animate);
     };
 
     init();
-    rendererRef.current!.setAnimationLoop(animate);
+    animationFrameId = requestAnimationFrame(animate);
 
     return () => {
       if (animationFrameId) {
