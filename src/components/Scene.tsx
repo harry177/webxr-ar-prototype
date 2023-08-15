@@ -38,7 +38,7 @@ export const Scene: React.FC = () => {
 
       const session = renderer.xr.getSession();
 
-      if (session) {
+      
         const geometry = new THREE.BoxGeometry();
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         const cube = new THREE.Mesh(geometry, material);
@@ -48,7 +48,7 @@ export const Scene: React.FC = () => {
         scene.add(cube);
 
         renderer.setAnimationLoop(animate);
-      }
+     
 
       document.body.appendChild(arButton);
 
