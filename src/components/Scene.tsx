@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { ARButton } from "three/examples/jsm/webxr/ARButton.js";
 import "./Scene.styles.css";
@@ -11,12 +11,7 @@ export const Scene: React.FC = () => {
   const cubeRef = useRef<THREE.Mesh | null>(null);
   const raycasterRef = useRef<THREE.Raycaster | null>(null);
 
-  const [sessionActive, setSessionActive] = useState(false);
-  const [cubeRendered, setCubeRendered] = useState(false);
-
   useEffect(() => {
-    let animationFrameId: number | null = null;
-
     const init = () => {
       const container = containerRef.current!;
       const scene = new THREE.Scene();
@@ -42,22 +37,22 @@ export const Scene: React.FC = () => {
       const arButton = ARButton.createButton(renderer);
 
       arButton.addEventListener("sessionstart", () => {
-        setSessionActive(true);
-
         const geometry = new THREE.BoxGeometry();
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         const cube = new THREE.Mesh(geometry, material);
         cube.position.set(0, 0, -1.5);
         cubeRef.current = cube;
-        setCubeRendered(true);
 
         scene.add(cube);
+
+        renderer.setAnimationLoop(animate);
       });
 
       arButton.addEventListener("sessionend", () => {
-        setSessionActive(false);
         scene.remove(cubeRef.current!);
         cubeRef.current = null;
+
+        renderer.setAnimationLoop(null);
       });
 
       document.body.appendChild(arButton);
@@ -76,28 +71,21 @@ export const Scene: React.FC = () => {
       const { current: camera } = cameraRef;
       const { current: cube } = cubeRef;
 
-      if (renderer && scene && camera) {
-        if (sessionActive && cubeRendered && cube) {
-          cube.rotation.x += 0.01;
-          cube.rotation.y += 0.01;
+      if (renderer && scene && camera && cube) {
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
 
-          renderer.render(scene, camera);
-        }
-        animationFrameId = requestAnimationFrame(animate);
+        renderer.render(scene, camera);
       }
     };
 
     init();
-    animationFrameId = requestAnimationFrame(animate);
 
     return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-
       const { current: renderer } = rendererRef;
 
       if (renderer) {
+        renderer.setAnimationLoop(null);
         renderer.dispose();
       }
     };
