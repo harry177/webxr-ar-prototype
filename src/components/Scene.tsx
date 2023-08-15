@@ -98,10 +98,6 @@ export const Scene: React.FC = () => {
         isDraggingRef.current = false;
       };
 
-      renderer.setAnimationLoop(() => {
-        animate();
-      });
-
       container.addEventListener("touchmove", handleTouchMove);
       container.addEventListener("touchend", handleTouchEnd);
     };
@@ -123,12 +119,12 @@ export const Scene: React.FC = () => {
       const { current: camera } = cameraRef;
 
       if (renderer && scene && camera && sessionActive) {
-        renderer.setAnimationLoop(animate);
         renderer.render(scene, camera);
       }
     };
 
     init();
+    rendererRef.current!.setAnimationLoop(animate);
 
     window.addEventListener("resize", handleWindowResize);
 
@@ -147,5 +143,9 @@ export const Scene: React.FC = () => {
     };
   }, []);
 
-  return <div className="scene-container" ref={containerRef}></div>;
+  return (
+    <>
+      <div ref={containerRef} className="scene-container" />
+    </>
+  );
 };
