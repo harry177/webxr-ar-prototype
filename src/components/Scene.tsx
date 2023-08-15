@@ -10,6 +10,7 @@ export const Scene: React.FC = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const cubeRef = useRef<THREE.Mesh | null>(null);
   const raycasterRef = useRef<THREE.Raycaster | null>(null);
+  //const readyRef = useRef<boolean>(false);
 
   useEffect(() => {
     const init = () => {
@@ -35,20 +36,20 @@ export const Scene: React.FC = () => {
       renderer.xr.enabled = true;
 
       const arButton = ARButton.createButton(renderer);
+      arButton.addEventListener("click", handleARSession);
 
-      const session = renderer.xr.getSession();
+      //const session = renderer.xr.getSession();
+      //readyRef.current = renderer.xr.isPresenting;
 
-      
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
-        cube.position.set(0, 0, -1.5);
-        cubeRef.current = cube;
+      const geometry = new THREE.BoxGeometry();
+      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      const cube = new THREE.Mesh(geometry, material);
+      cube.position.set(0, 0, -1.5);
+      cubeRef.current = cube;
 
-        scene.add(cube);
+      //scene.add(cube);
 
-        renderer.setAnimationLoop(animate);
-     
+      renderer.setAnimationLoop(animate);
 
       document.body.appendChild(arButton);
 
@@ -71,8 +72,16 @@ export const Scene: React.FC = () => {
           cube.rotation.x += 0.01;
           cube.rotation.y += 0.01;
         }
-        
+
         renderer.render(scene, camera);
+      }
+    };
+
+    const handleARSession = () => {
+      const { current: scene } = sceneRef;
+      const { current: cube } = cubeRef;
+      if (scene && cube) {
+        scene.add(cube);
       }
     };
 
