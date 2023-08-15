@@ -66,10 +66,12 @@ export const Scene: React.FC = () => {
       const { current: camera } = cameraRef;
       const { current: cube } = cubeRef;
 
-      if (renderer && scene && camera && cube) {
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.01;
-
+      if (renderer && scene && camera) {
+        if (cube) {
+          cube.rotation.x += 0.01;
+          cube.rotation.y += 0.01;
+        }
+        
         renderer.render(scene, camera);
       }
     };
