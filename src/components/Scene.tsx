@@ -59,8 +59,11 @@ export const Scene: React.FC = () => {
       const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
       const cube = new THREE.Mesh(geometry, material);
       cube.position.set(0, 0, -2);
-      scene.add(cube);
       cubeRef.current = cube;
+
+      if (sessionActive) {
+        scene.add(cube);
+      }
 
       camera.position.z = 5;
 
@@ -117,8 +120,14 @@ export const Scene: React.FC = () => {
       const { current: renderer } = rendererRef;
       const { current: scene } = sceneRef;
       const { current: camera } = cameraRef;
+      const { current: cube } = cubeRef;
 
       if (renderer && scene && camera && sessionActive) {
+        if (cube) {
+          cube.rotation.x += 0.01;
+          cube.rotation.y += 0.01;
+        }
+
         renderer.render(scene, camera);
       }
     };
