@@ -41,8 +41,12 @@ export const Scene: React.FC = () => {
       //const session = renderer.xr.getSession();
       //readyRef.current = renderer.xr.isPresenting;
 
+      const loader = new THREE.TextureLoader();
+      const texture = loader.load(require("../assets/tv-texture.jpg"));
+      texture.colorSpace = THREE.SRGBColorSpace;
+
       const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      const material = new THREE.MeshBasicMaterial({ map: texture });
       const cube = new THREE.Mesh(geometry, material);
       cube.scale.set(0.5, 0.5, 0.5);
       cube.position.set(0, 0, -2.5);
