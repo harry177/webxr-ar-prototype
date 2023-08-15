@@ -12,6 +12,7 @@ export const Scene: React.FC = () => {
   const raycasterRef = useRef<THREE.Raycaster | null>(null);
 
   const [sessionActive, setSessionActive] = useState(false);
+  const [cubeRendered, setCubeRendered] = useState(false);
 
   useEffect(() => {
     let animationFrameId: number | null = null;
@@ -48,6 +49,7 @@ export const Scene: React.FC = () => {
         const cube = new THREE.Mesh(geometry, material);
         cube.position.set(0, 0, -1.5);
         cubeRef.current = cube;
+        setCubeRendered(true);
 
         scene.add(cube);
       });
@@ -75,17 +77,14 @@ export const Scene: React.FC = () => {
       const { current: cube } = cubeRef;
 
       if (renderer && scene && camera) {
-        if (sessionActive) {
-          if (cube) {
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-          }
+        if (sessionActive && cubeRendered && cube) {
+          cube.rotation.x += 0.01;
+          cube.rotation.y += 0.01;
 
           renderer.render(scene, camera);
         }
         animationFrameId = requestAnimationFrame(animate);
       }
-      
     };
 
     init();
