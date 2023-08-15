@@ -10,10 +10,6 @@ export const Scene: React.FC = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const cubeRef = useRef<THREE.Mesh | null>(null);
   const raycasterRef = useRef<THREE.Raycaster | null>(null);
-  const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
-  const isDraggingRef = useRef(false);
-  const lastClientXRef = useRef(0);
-  const lastClientYRef = useRef(0);
 
   const [sessionActive, setSessionActive] = useState(false);
 
@@ -46,9 +42,17 @@ export const Scene: React.FC = () => {
 
       arButton.addEventListener("sessionstart", () => {
         setSessionActive(true);
+
+        if (cubeRef.current) {
+          scene.add(cubeRef.current);
+        }
       });
       arButton.addEventListener("sessionend", () => {
         setSessionActive(false);
+
+        if (cubeRef.current) {
+          scene.remove(cubeRef.current);
+        }
       });
 
       document.body.appendChild(arButton);
@@ -61,59 +65,10 @@ export const Scene: React.FC = () => {
       cube.position.set(0, 0, -0.5);
       cubeRef.current = cube;
 
-      if (sessionActive) {
-        scene.add(cube);
-      }
-
       camera.position.z = 5;
 
       const raycaster = new THREE.Raycaster();
       raycasterRef.current = raycaster;
-
-      const handleTouchMove = (event: TouchEvent) => {
-        event.preventDefault();
-
-        if (isDraggingRef.current && event.touches.length === 1) {
-          const touch = event.touches[0];
-          const rect = container.getBoundingClientRect();
-          const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-          const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-
-          mouseRef.current.set(x, y);
-          raycaster.setFromCamera(mouseRef.current, camera);
-
-          const intersects = raycaster.intersectObjects(scene.children);
-
-          if (intersects.length > 0) {
-            const movementX = touch.clientX - lastClientXRef.current;
-            const movementY = touch.clientY - lastClientYRef.current;
-
-            cube.rotation.x += movementY * 0.01;
-            cube.rotation.y += movementX * 0.01;
-          }
-
-          lastClientXRef.current = touch.clientX;
-          lastClientYRef.current = touch.clientY;
-        }
-      };
-
-      const handleTouchEnd = () => {
-        isDraggingRef.current = false;
-      };
-
-      container.addEventListener("touchmove", handleTouchMove);
-      container.addEventListener("touchend", handleTouchEnd);
-    };
-
-    const handleWindowResize = () => {
-      const { current: renderer } = rendererRef;
-      const { current: camera } = cameraRef;
-
-      if (renderer && camera) {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }
     };
 
     const animate = () => {
@@ -135,11 +90,7 @@ export const Scene: React.FC = () => {
     init();
     rendererRef.current!.setAnimationLoop(animate);
 
-    window.addEventListener("resize", handleWindowResize);
-
     return () => {
-      window.removeEventListener("resize", handleWindowResize);
-
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
