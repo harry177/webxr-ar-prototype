@@ -37,22 +37,15 @@ export const Scene: React.FC = () => {
       rendererRef.current = renderer;
 
       renderer.xr.enabled = true;
+      renderer.xr.setReferenceSpaceType('local');
 
       const arButton = ARButton.createButton(renderer);
 
       arButton.addEventListener("sessionstart", () => {
         setSessionActive(true);
-
-        if (cubeRef.current) {
-          scene.add(cubeRef.current);
-        }
       });
       arButton.addEventListener("sessionend", () => {
         setSessionActive(false);
-
-        if (cubeRef.current) {
-          scene.remove(cubeRef.current);
-        }
       });
 
       document.body.appendChild(arButton);
@@ -77,13 +70,19 @@ export const Scene: React.FC = () => {
       const { current: camera } = cameraRef;
       const { current: cube } = cubeRef;
 
-      if (renderer && scene && camera && sessionActive) {
-        if (cube) {
-          cube.rotation.x += 0.01;
-          cube.rotation.y += 0.01;
-        }
+      if (renderer && scene && camera) {
+        if (sessionActive) {
+          renderer.setAnimationLoop(null);
 
-        renderer.render(scene, camera);
+          if (cube) {
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+          }
+
+          renderer.render(scene, camera);
+        } else {
+          renderer.setAnimationLoop(animate);
+        }
       }
     };
 
