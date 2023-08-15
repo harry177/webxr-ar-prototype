@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { ARButton } from "three/examples/jsm/webxr/ARButton.js";
 import "./Scene.styles.css";
@@ -14,6 +14,8 @@ export const Scene: React.FC = () => {
   const isDraggingRef = useRef(false);
   const lastClientXRef = useRef(0);
   const lastClientYRef = useRef(0);
+
+  const [sessionActive, setSessionActive] = useState(false);
 
   useEffect(() => {
     let animationFrameId: number | null = null;
@@ -31,13 +33,24 @@ export const Scene: React.FC = () => {
       );
       cameraRef.current = camera;
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+      });
       renderer.setSize(container.clientWidth, container.clientHeight);
       rendererRef.current = renderer;
-      
+
       renderer.xr.enabled = true;
 
       const arButton = ARButton.createButton(renderer);
+
+      arButton.addEventListener("sessionstart", () => {
+        setSessionActive(true);
+      });
+      arButton.addEventListener("sessionend", () => {
+        setSessionActive(false);
+      });
+
       document.body.appendChild(arButton);
 
       container.appendChild(renderer.domElement);
@@ -45,6 +58,7 @@ export const Scene: React.FC = () => {
       const geometry = new THREE.BoxGeometry();
       const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
       const cube = new THREE.Mesh(geometry, material);
+      cube.position.set(0, 0, -2);
       scene.add(cube);
       cubeRef.current = cube;
 
@@ -52,75 +66,6 @@ export const Scene: React.FC = () => {
 
       const raycaster = new THREE.Raycaster();
       raycasterRef.current = raycaster;
-
-      const handleMouseDown = (event: MouseEvent) => {
-        event.preventDefault();
-
-        const rect = container.getBoundingClientRect();
-        const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-        mouseRef.current.set(x, y);
-        raycaster.setFromCamera(mouseRef.current, camera);
-
-        const intersects = raycaster.intersectObjects(scene.children);
-
-        if (intersects.length > 0) {
-          isDraggingRef.current = true;
-          lastClientXRef.current = event.clientX;
-          lastClientYRef.current = event.clientY;
-        }
-      };
-
-      const handleMouseMove = (event: MouseEvent) => {
-        event.preventDefault();
-
-        if (isDraggingRef.current) {
-          const rect = container.getBoundingClientRect();
-          const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-          const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-          mouseRef.current.set(x, y);
-          raycaster.setFromCamera(mouseRef.current, camera);
-
-          const intersects = raycaster.intersectObjects(scene.children);
-
-          if (intersects.length > 0) {
-            const movementX = event.clientX - lastClientXRef.current;
-            const movementY = event.clientY - lastClientYRef.current;
-
-            cube.rotation.x += movementY * 0.01;
-            cube.rotation.y += movementX * 0.01;
-          }
-
-          lastClientXRef.current = event.clientX;
-          lastClientYRef.current = event.clientY;
-        }
-      };
-
-      const handleMouseUp = () => {
-        isDraggingRef.current = false;
-      };
-
-      const handleTouchStart = (event: TouchEvent) => {
-        event.preventDefault();
-
-        const touch = event.touches[0];
-        const rect = container.getBoundingClientRect();
-        const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-        const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
-
-        mouseRef.current.set(x, y);
-        raycaster.setFromCamera(mouseRef.current, camera);
-
-        const intersects = raycaster.intersectObjects(scene.children);
-
-        if (intersects.length > 0) {
-          isDraggingRef.current = true;
-          lastClientXRef.current = touch.clientX;
-          lastClientYRef.current = touch.clientY;
-        }
-      };
 
       const handleTouchMove = (event: TouchEvent) => {
         event.preventDefault();
@@ -157,10 +102,6 @@ export const Scene: React.FC = () => {
         animate();
       });
 
-      container.addEventListener("mousedown", handleMouseDown);
-      container.addEventListener("mousemove", handleMouseMove);
-      container.addEventListener("mouseup", handleMouseUp);
-      container.addEventListener("touchstart", handleTouchStart);
       container.addEventListener("touchmove", handleTouchMove);
       container.addEventListener("touchend", handleTouchEnd);
     };
@@ -181,7 +122,7 @@ export const Scene: React.FC = () => {
       const { current: scene } = sceneRef;
       const { current: camera } = cameraRef;
 
-      if (renderer && scene && camera) {
+      if (renderer && scene && camera && sessionActive) {
         renderer.setAnimationLoop(animate);
         renderer.render(scene, camera);
       }
