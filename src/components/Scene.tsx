@@ -46,7 +46,7 @@ export const Scene: React.FC = () => {
         const geometry = new THREE.BoxGeometry();
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         const cube = new THREE.Mesh(geometry, material);
-        cube.position.set(0, 0, -0.5);
+        cube.position.set(0, 0, -1.5);
         cubeRef.current = cube;
 
         scene.add(cube);
@@ -83,7 +83,7 @@ export const Scene: React.FC = () => {
 
           renderer.render(scene, camera);
         }
-        renderer.setAnimationLoop(animate);
+        animationFrameId = requestAnimationFrame(animate);
       }
       
     };
