@@ -40,11 +40,10 @@ export const Scene: React.FC = () => {
       arButton.addEventListener("click", handleARSession);
 
       const video = videoRef.current;
-     
+
       if (video) {
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
-        
+        //video.setAttribute("webkit-playsinline", "");
+
         const texture = new THREE.VideoTexture(video);
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
@@ -54,7 +53,7 @@ export const Scene: React.FC = () => {
 
         const geometry = new THREE.BoxGeometry();
         const material = new THREE.MeshBasicMaterial({
-          map: texture
+          map: texture,
         });
         const cube = new THREE.Mesh(geometry, material);
         cube.scale.set(0.5, 0.5, 0.5);
@@ -99,8 +98,12 @@ export const Scene: React.FC = () => {
     const handleARSession = () => {
       const { current: scene } = sceneRef;
       const { current: cube } = cubeRef;
+      const { current: video } = videoRef;
       if (scene && cube) {
         scene.add(cube);
+      }
+      if (video) {
+        video.play();
       }
     };
 
@@ -119,6 +122,7 @@ export const Scene: React.FC = () => {
     <>
       <video
         ref={videoRef}
+        src="https://webglsamples.org/color-adjust/sample-video.mp4"
         className="video-texture"
         muted
         autoPlay
@@ -126,8 +130,9 @@ export const Scene: React.FC = () => {
         preload="auto"
         crossOrigin="anonymous"
         controls
+        playsInline
       >
-        <source type="video/mp4" src="https://webglsamples.org/color-adjust/sample-video.mp4"></source>
+        <source type="video/mp4"></source>
       </video>
       <div ref={containerRef} className="scene-container" />
     </>
