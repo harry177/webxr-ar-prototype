@@ -15,9 +15,90 @@ export const Scene: React.FC = () => {
 
   const [isMuted, setIsMuted] = useState(true);
 
+  const handleMouseClick = (event: MouseEvent) => {
+    const { current: raycaster } = raycasterRef;
+    const { current: camera } = cameraRef;
+    const { current: cube } = cubeRef;
+
+    if (raycaster && camera && cube) {
+      const mouse = new THREE.Vector2();
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+
+      const intersects = raycaster.intersectObject(cube);
+
+      if (intersects.length > 0) {
+        cube.scale.set(
+          cube.scale.x * 1.1,
+          cube.scale.y * 1.1,
+          cube.scale.z * 1.1
+        );
+        setIsMuted((isMuted) => !isMuted);
+        console.log('fff');
+      }
+    }
+  };
+
+  const handleTouchStart = (event: TouchEvent) => {
+    const { current: raycaster } = raycasterRef;
+    const { current: camera } = cameraRef;
+    const { current: cube } = cubeRef;
+  
+    if (raycaster && camera && cube) {
+      const touch = event.touches[0];
+      const touchX = touch.clientX; 
+      const touchY = touch.clientY; 
+  
+      const mouse = new THREE.Vector2();
+      mouse.x = (touchX / window.innerWidth) * 2 - 1;
+      mouse.y = -(touchY / window.innerHeight) * 2 + 1;
+  
+      raycaster.setFromCamera(mouse, camera);
+  
+      const intersects = raycaster.intersectObject(cube);
+  
+      if (intersects.length > 0) {
+        cube.scale.set(
+          cube.scale.x * 1.1,
+          cube.scale.y * 1.1,
+          cube.scale.z * 1.1
+        );
+        setIsMuted((isMuted) => !isMuted);
+        console.log('fff');
+      }
+    }
+  };
+
+  function handleDocumentClick() {
+    const { current: container } = containerRef;
+    if (container) {
+      container.addEventListener("click", handleMouseClick);
+      container.addEventListener("touchstart", handleTouchStart);
+    }
+  }
+
   useEffect(() => {
+    const handleWindowResize = () => {
+      const { current: camera } = cameraRef;
+      const { current: renderer } = rendererRef;
+  
+      if (camera && renderer) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+    };
     const init = () => {
       const container = containerRef.current!;
+
+      container.addEventListener("click", handleDocumentClick);
+
+      
+    
+      window.addEventListener("resize", handleWindowResize);
+
       const scene = new THREE.Scene();
       sceneRef.current = scene;
 
@@ -39,12 +120,23 @@ export const Scene: React.FC = () => {
       renderer.xr.enabled = true;
 
       const arButton = ARButton.createButton(renderer);
+
+      const handleARSession = () => {
+        const { current: scene } = sceneRef;
+        const { current: cube } = cubeRef;
+        const { current: video } = videoRef;
+        if (scene && cube) {
+          scene.add(cube);
+        }
+        if (video) {
+          video.play();
+        }
+      };
       arButton.addEventListener("click", handleARSession);
 
       const video = videoRef.current;
 
       if (video) {
-
         const texture = new THREE.VideoTexture(video);
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
@@ -71,8 +163,11 @@ export const Scene: React.FC = () => {
 
         const raycaster = new THREE.Raycaster();
         raycasterRef.current = raycaster;
+
         video.play();
       }
+
+      document.addEventListener("click", handleDocumentClick);
     };
 
     const animate = () => {
@@ -89,31 +184,11 @@ export const Scene: React.FC = () => {
         }
 
         if (texture) {
-          if (videoRef.current) {
-            videoRef.current.muted = isMuted;
-          }
           texture.needsUpdate = true;
         }
 
         renderer.render(scene, camera);
       }
-    };
-
-    const handleARSession = () => {
-      const { current: scene } = sceneRef;
-      const { current: cube } = cubeRef;
-      const { current: video } = videoRef;
-      if (scene && cube) {
-        scene.add(cube);
-        cube.addEventListener("click", handleCubeClick);
-      }
-      if (video) {
-        video.play();
-      }
-    };
-
-    const handleCubeClick = () => {
-      setIsMuted((isMuted) => !isMuted);
     };
 
     init();
@@ -124,8 +199,21 @@ export const Scene: React.FC = () => {
       if (renderer) {
         renderer.dispose();
       }
+
+      const { current: container } = containerRef;
+      if (container) {
+        container.removeEventListener("click", handleDocumentClick);
+      }
+      window.removeEventListener("resize", handleWindowResize);
     };
   }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.muted = isMuted;
+    }
+  }, [isMuted]);
 
   return (
     <>
@@ -140,7 +228,10 @@ export const Scene: React.FC = () => {
         controls
         playsInline
       >
-        <source type="video/mp4" src="https://webglsamples.org/color-adjust/sample-video.mp4"></source>
+        <source
+          type="video/mp4"
+          src="https://webglsamples.org/color-adjust/sample-video.mp4"
+        ></source>
       </video>
       <div ref={containerRef} className="scene-container" />
     </>
