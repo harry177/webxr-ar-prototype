@@ -42,6 +42,8 @@ export const Scene: React.FC = () => {
       const video = videoRef.current;
      
       if (video) {
+        video.setAttribute('playsinline', 'playsinline');
+        video.setAttribute('webkit-playsinline', 'webkit-playsinline');
         video.play();
         const texture = new THREE.VideoTexture(video);
         texture.minFilter = THREE.LinearFilter;
@@ -52,9 +54,7 @@ export const Scene: React.FC = () => {
 
         const geometry = new THREE.BoxGeometry();
         const material = new THREE.MeshBasicMaterial({
-          map: texture,
-          side: THREE.FrontSide,
-          toneMapped: false,
+          map: texture
         });
         const cube = new THREE.Mesh(geometry, material);
         cube.scale.set(0.5, 0.5, 0.5);
@@ -121,7 +121,6 @@ export const Scene: React.FC = () => {
         className="video-texture"
         width="100%"
         height="100%"
-        playsInline
         muted
         autoPlay
         loop
