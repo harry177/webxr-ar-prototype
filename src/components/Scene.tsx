@@ -42,9 +42,9 @@ export const Scene: React.FC = () => {
       const video = videoRef.current;
      
       if (video) {
-        video.setAttribute('playsinline', 'playsinline');
-        video.setAttribute('webkit-playsinline', 'webkit-playsinline');
-        video.play();
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        
         const texture = new THREE.VideoTexture(video);
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
@@ -71,6 +71,7 @@ export const Scene: React.FC = () => {
 
         const raycaster = new THREE.Raycaster();
         raycasterRef.current = raycaster;
+        video.play();
       }
     };
 
@@ -119,8 +120,6 @@ export const Scene: React.FC = () => {
       <video
         ref={videoRef}
         className="video-texture"
-        width="100%"
-        height="100%"
         muted
         autoPlay
         loop
