@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { ARButton } from "three/examples/jsm/webxr/ARButton.js";
 import "./Scene.styles.css";
@@ -12,6 +12,8 @@ export const Scene: React.FC = () => {
   const raycasterRef = useRef<THREE.Raycaster | null>(null);
   const textureRef = useRef<THREE.VideoTexture | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     const init = () => {
@@ -42,7 +44,6 @@ export const Scene: React.FC = () => {
       const video = videoRef.current;
 
       if (video) {
-        //video.setAttribute("webkit-playsinline", "");
 
         const texture = new THREE.VideoTexture(video);
         texture.minFilter = THREE.LinearFilter;
@@ -88,6 +89,9 @@ export const Scene: React.FC = () => {
         }
 
         if (texture) {
+          if (videoRef.current) {
+            videoRef.current.muted = isMuted;
+          }
           texture.needsUpdate = true;
         }
 
@@ -101,10 +105,15 @@ export const Scene: React.FC = () => {
       const { current: video } = videoRef;
       if (scene && cube) {
         scene.add(cube);
+        cube.addEventListener("click", handleCubeClick);
       }
       if (video) {
         video.play();
       }
+    };
+
+    const handleCubeClick = () => {
+      setIsMuted((isMuted) => !isMuted);
     };
 
     init();
@@ -122,7 +131,6 @@ export const Scene: React.FC = () => {
     <>
       <video
         ref={videoRef}
-        src="https://webglsamples.org/color-adjust/sample-video.mp4"
         className="video-texture"
         muted
         autoPlay
@@ -132,7 +140,7 @@ export const Scene: React.FC = () => {
         controls
         playsInline
       >
-        <source type="video/mp4"></source>
+        <source type="video/mp4" src="https://webglsamples.org/color-adjust/sample-video.mp4"></source>
       </video>
       <div ref={containerRef} className="scene-container" />
     </>
