@@ -113,7 +113,7 @@ export const Scene: React.FC = () => {
 
       renderer.xr.enabled = true;
 
-      //renderer.domElement.addEventListener("touchstart", handleTouchStart);
+      renderer.domElement.addEventListener("touchstart", handleTouchStart);
 
       const arButton = ARButton.createButton(renderer);
 
