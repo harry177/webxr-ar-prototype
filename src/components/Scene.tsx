@@ -36,19 +36,19 @@ export const Scene: React.FC = () => {
           cube.scale.z * 1.1
         );
         setIsMuted((isMuted) => !isMuted);
-        console.log('fff');
+        console.log("fff");
       }
     }
   };
 
-  const handleTouchStart = (event: TouchEvent) => {
+  const handleTouchStart = (event) => {
     const { current: raycaster } = raycasterRef;
     const { current: camera } = cameraRef;
     const { current: cube } = cubeRef;
     const { current: scene } = sceneRef;
 
     if (scene && raycaster && camera && cube) {
-    const touch = event.touches[0];
+      const touch = event.touches[0];
       const x = (touch.clientX / window.innerWidth) * 2 - 1;
       const y = -(touch.clientY / window.innerHeight) * 2 + 1;
 
@@ -63,7 +63,7 @@ export const Scene: React.FC = () => {
           cube.scale.z * 1.1
         );
         setIsMuted((isMuted) => !isMuted);
-        console.log('fff')
+        console.log("fff");
       }
     }
   };
@@ -79,7 +79,7 @@ export const Scene: React.FC = () => {
     const handleWindowResize = () => {
       const { current: camera } = cameraRef;
       const { current: renderer } = rendererRef;
-  
+
       if (camera && renderer) {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -90,7 +90,7 @@ export const Scene: React.FC = () => {
       const container = containerRef.current!;
 
       container.addEventListener("click", handleDocumentClick);
-    
+
       window.addEventListener("resize", handleWindowResize);
 
       const scene = new THREE.Scene();
@@ -113,7 +113,7 @@ export const Scene: React.FC = () => {
 
       renderer.xr.enabled = true;
 
-      renderer.domElement.addEventListener("touchstart", handleTouchStart);
+      //renderer.domElement.addEventListener("touchstart", handleTouchStart);
 
       const arButton = ARButton.createButton(renderer);
 
@@ -129,6 +129,10 @@ export const Scene: React.FC = () => {
         }
       };
       arButton.addEventListener("click", handleARSession);
+
+      const controller = renderer.xr.getController(0);
+      controller.addEventListener("select", handleTouchStart);
+      scene.add(controller);
 
       const video = videoRef.current;
 
@@ -197,10 +201,11 @@ export const Scene: React.FC = () => {
       }
 
       const { current: container } = containerRef;
-     
-        container && container.removeEventListener("click", handleDocumentClick);
-        renderer && renderer.domElement.removeEventListener("touchstart", handleTouchStart);
-    
+
+      container && container.removeEventListener("click", handleDocumentClick);
+      renderer &&
+        renderer.domElement.removeEventListener("touchstart", handleTouchStart);
+
       window.removeEventListener("resize", handleWindowResize);
     };
   }, []);
