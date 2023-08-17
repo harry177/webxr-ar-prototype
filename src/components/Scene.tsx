@@ -45,28 +45,25 @@ export const Scene: React.FC = () => {
     const { current: raycaster } = raycasterRef;
     const { current: camera } = cameraRef;
     const { current: cube } = cubeRef;
-  
-    if (raycaster && camera && cube) {
-      const touch = event.touches[0];
-      const touchX = touch.clientX; 
-      const touchY = touch.clientY; 
-  
-      const mouse = new THREE.Vector2();
-      mouse.x = (touchX / window.innerWidth) * 2 - 1;
-      mouse.y = -(touchY / window.innerHeight) * 2 + 1;
-  
+    const { current: scene } = sceneRef;
+
+    if (scene && raycaster && camera && cube) {
+    const touch = event.touches[0];
+      const x = (touch.clientX / window.innerWidth) * 2 - 1;
+      const y = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+      const mouse = new THREE.Vector2(x, y);
       raycaster.setFromCamera(mouse, camera);
-  
-      const intersects = raycaster.intersectObject(cube);
-  
-      if (intersects.length > 0) {
+
+      const intersects = raycaster.intersectObjects(scene.children, true);
+      if (intersects.length > 0 && intersects[0].object === cube) {
         cube.scale.set(
           cube.scale.x * 1.1,
           cube.scale.y * 1.1,
           cube.scale.z * 1.1
         );
         setIsMuted((isMuted) => !isMuted);
-        console.log('fff');
+        console.log('fff')
       }
     }
   };
@@ -75,7 +72,6 @@ export const Scene: React.FC = () => {
     const { current: container } = containerRef;
     if (container) {
       container.addEventListener("click", handleMouseClick);
-      container.addEventListener("touchstart", handleTouchStart);
     }
   }
 
@@ -94,8 +90,6 @@ export const Scene: React.FC = () => {
       const container = containerRef.current!;
 
       container.addEventListener("click", handleDocumentClick);
-
-      
     
       window.addEventListener("resize", handleWindowResize);
 
@@ -118,6 +112,8 @@ export const Scene: React.FC = () => {
       rendererRef.current = renderer;
 
       renderer.xr.enabled = true;
+
+      renderer.domElement.addEventListener("touchstart", handleTouchStart);
 
       const arButton = ARButton.createButton(renderer);
 
@@ -201,9 +197,10 @@ export const Scene: React.FC = () => {
       }
 
       const { current: container } = containerRef;
-      if (container) {
-        container.removeEventListener("click", handleDocumentClick);
-      }
+     
+        container && container.removeEventListener("click", handleDocumentClick);
+        renderer && renderer.domElement.removeEventListener("touchstart", handleTouchStart);
+    
       window.removeEventListener("resize", handleWindowResize);
     };
   }, []);
