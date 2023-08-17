@@ -41,29 +41,47 @@ export const Scene: React.FC = () => {
     }
   };
 
-  const handleTouchStart = (event) => {
+  const handleSelect = (event: any) => {
+    const { current: renderer } = rendererRef;
     const { current: raycaster } = raycasterRef;
     const { current: camera } = cameraRef;
     const { current: cube } = cubeRef;
     const { current: scene } = sceneRef;
 
-    if (scene && raycaster && camera && cube) {
-      const touch = event.touches[0];
-      const x = (touch.clientX / window.innerWidth) * 2 - 1;
-      const y = -(touch.clientY / window.innerHeight) * 2 + 1;
+    if (scene && raycaster && camera && cube && renderer) {
+      const session = renderer.xr.getSession();
+      const referenceSpace = renderer.xr.getReferenceSpace();
 
-      const mouse = new THREE.Vector2(x, y);
-      raycaster.setFromCamera(mouse, camera);
+      if (session && referenceSpace) {
 
-      const intersects = raycaster.intersectObjects(scene.children, true);
-      if (intersects.length > 0 && intersects[0].object === cube) {
-        cube.scale.set(
-          cube.scale.x * 1.1,
-          cube.scale.y * 1.1,
-          cube.scale.z * 1.1
-        );
-        setIsMuted((isMuted) => !isMuted);
-        console.log("fff");
+        /*session.requestReferenceSpace("viewer").then(function (referenceSpace) {
+          session?
+            .requestHitTestSource({ space: referenceSpace })
+            
+          })*/
+        
+        const pose = event.frame.getPose(event.inputSource.targetRaySpace, referenceSpace);
+        if (pose) {
+          const touch = pose.transform.position;
+          const x = (touch.x / window.innerWidth) * 2 - 1;
+          const y = -(touch.y / window.innerHeight) * 2 + 1;
+  
+          const mouse = new THREE.Vector2(x, y);
+          raycaster.setFromCamera(mouse, camera);
+  
+          const intersects = raycaster.intersectObjects(scene.children, true);
+          if (intersects.length > 0 && intersects[0].object === cube) {
+            cube.scale.set(
+              cube.scale.x * 1.1,
+              cube.scale.y * 1.1,
+              cube.scale.z * 1.1
+            );
+  
+            setIsMuted((isMuted) => !isMuted);
+  
+            console.log("fff");
+          }
+        }
       }
     }
   };
@@ -87,6 +105,7 @@ export const Scene: React.FC = () => {
       }
     };
     const init = () => {
+
       const container = containerRef.current!;
 
       container.addEventListener("click", handleDocumentClick);
@@ -113,7 +132,13 @@ export const Scene: React.FC = () => {
 
       renderer.xr.enabled = true;
 
-      renderer.domElement.addEventListener("touchstart", handleTouchStart);
+      //const session = await navigator.xr?.requestSession("immersive-ar", {requiredFeatures: ['hit-test']});
+      
+/*if (session) {
+  const viewerSpace = await session.requestReferenceSpace('viewer');
+  const hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
+}*/
+      
 
       const arButton = ARButton.createButton(renderer);
 
@@ -131,7 +156,7 @@ export const Scene: React.FC = () => {
       arButton.addEventListener("click", handleARSession);
 
       const controller = renderer.xr.getController(0);
-      controller.addEventListener("select", handleTouchStart);
+      controller.addEventListener("select", handleSelect);
       scene.add(controller);
 
       const video = videoRef.current;
@@ -203,8 +228,6 @@ export const Scene: React.FC = () => {
       const { current: container } = containerRef;
 
       container && container.removeEventListener("click", handleDocumentClick);
-      renderer &&
-        renderer.domElement.removeEventListener("touchstart", handleTouchStart);
 
       window.removeEventListener("resize", handleWindowResize);
     };
