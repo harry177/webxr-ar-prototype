@@ -117,7 +117,7 @@ export const Scene: React.FC = () => {
       const referenceSpace = renderer.xr.getReferenceSpace();
 
 
-      const handleSelect = (event: THREE.Event) => {
+      const handleSelect = (event: any) => {
         const { current: renderer } = rendererRef;
         const { current: raycaster } = raycasterRef;
         const { current: camera } = cameraRef;
