@@ -41,50 +41,6 @@ export const Scene: React.FC = () => {
     }
   };
 
-  const handleSelect = (event: any) => {
-    const { current: renderer } = rendererRef;
-    const { current: raycaster } = raycasterRef;
-    const { current: camera } = cameraRef;
-    const { current: cube } = cubeRef;
-    const { current: scene } = sceneRef;
-
-    if (scene && raycaster && camera && cube && renderer) {
-      const session = renderer.xr.getSession();
-      const referenceSpace = renderer.xr.getReferenceSpace();
-
-      if (session && referenceSpace) {
-
-        /*session.requestReferenceSpace("viewer").then(function (referenceSpace) {
-          session?
-            .requestHitTestSource({ space: referenceSpace })
-            
-          })*/
-        
-        const pose = event.frame.getPose(event.inputSource.targetRaySpace, referenceSpace);
-        if (pose) {
-          const touch = pose.transform.position;
-          const x = (touch.x / window.innerWidth) * 2 - 1;
-          const y = -(touch.y / window.innerHeight) * 2 + 1;
-  
-          const mouse = new THREE.Vector2(x, y);
-          raycaster.setFromCamera(mouse, camera);
-  
-          const intersects = raycaster.intersectObjects(scene.children, true);
-          if (intersects.length > 0 && intersects[0].object === cube) {
-            cube.scale.set(
-              cube.scale.x * 1.1,
-              cube.scale.y * 1.1,
-              cube.scale.z * 1.1
-            );
-  
-            setIsMuted((isMuted) => !isMuted);
-  
-            console.log("fff");
-          }
-        }
-      }
-    }
-  };
 
   function handleDocumentClick() {
     const { current: container } = containerRef;
@@ -140,7 +96,9 @@ export const Scene: React.FC = () => {
 }*/
       
 
-      const arButton = ARButton.createButton(renderer);
+      const arButton = ARButton.createButton(renderer, {
+        requiredFeatures: ["hit-test"]
+      });
 
       const handleARSession = () => {
         const { current: scene } = sceneRef;
@@ -154,6 +112,42 @@ export const Scene: React.FC = () => {
         }
       };
       arButton.addEventListener("click", handleARSession);
+
+      const session = renderer.xr.getSession();
+      const referenceSpace = renderer.xr.getReferenceSpace();
+
+
+      const handleSelect = (event: THREE.Event) => {
+        const { current: renderer } = rendererRef;
+        const { current: raycaster } = raycasterRef;
+        const { current: camera } = cameraRef;
+        const { current: cube } = cubeRef;
+        const { current: scene } = sceneRef;
+    
+        if (scene && raycaster && camera && cube && renderer) {
+          if (session && referenceSpace) {
+            const pose = event.frame.getPose(event.inputSource.targetRaySpace, referenceSpace);
+      
+            if (pose) {
+              const intersects = raycaster.intersectObjects(scene.children, true);
+              if (intersects.length > 0 && intersects[0].object === cube) {
+                cube.scale.set(
+                  cube.scale.x * 1.1,
+                  cube.scale.y * 1.1,
+                  cube.scale.z * 1.1
+                );
+      
+                setIsMuted((isMuted) => !isMuted);
+      
+                console.log("fff");
+              }
+            }
+          }
+           
+        
+        }
+      };
+
 
       const controller = renderer.xr.getController(0);
       controller.addEventListener("select", handleSelect);
