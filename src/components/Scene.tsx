@@ -113,22 +113,19 @@ export const Scene: React.FC = () => {
       };
       arButton.addEventListener("click", handleARSession);
 
-      const session = renderer.xr.getSession();
-      const referenceSpace = renderer.xr.getReferenceSpace();
+      //const session = renderer.xr.getSession();
+      //const referenceSpace = renderer.xr.getReferenceSpace();
 
 
-      const handleSelect = (event: any) => {
-        const { current: renderer } = rendererRef;
+      const handleSelect = () => {
+        //const { current: renderer } = rendererRef;
         const { current: raycaster } = raycasterRef;
-        const { current: camera } = cameraRef;
+        //const { current: camera } = cameraRef;
         const { current: cube } = cubeRef;
         const { current: scene } = sceneRef;
     
-        if (scene && raycaster && camera && cube && renderer) {
-          if (session && referenceSpace) {
-            const pose = event.frame.getPose(event.inputSource.targetRaySpace, referenceSpace);
-      
-            if (pose) {
+        if (scene && raycaster && cube) {
+            
               const intersects = raycaster.intersectObjects(scene.children, true);
               if (intersects.length > 0 && intersects[0].object === cube) {
                 cube.scale.set(
@@ -141,8 +138,8 @@ export const Scene: React.FC = () => {
       
                 console.log("fff");
               }
-            }
-          }
+            
+         
            
         
         }
