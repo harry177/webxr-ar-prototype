@@ -41,7 +41,6 @@ export const Scene: React.FC = () => {
     }
   };
 
-
   function handleDocumentClick() {
     const { current: container } = containerRef;
     if (container) {
@@ -61,7 +60,7 @@ export const Scene: React.FC = () => {
       }
     };
     const init = () => {
-
+    
       const container = containerRef.current!;
 
       container.addEventListener("click", handleDocumentClick);
@@ -83,21 +82,13 @@ export const Scene: React.FC = () => {
         antialias: true,
         alpha: true,
       });
+
       renderer.setSize(container.clientWidth, container.clientHeight);
       rendererRef.current = renderer;
-
       renderer.xr.enabled = true;
-
-      //const session = await navigator.xr?.requestSession("immersive-ar", {requiredFeatures: ['hit-test']});
-      
-/*if (session) {
-  const viewerSpace = await session.requestReferenceSpace('viewer');
-  const hitTestSource = await session.requestHitTestSource({ space: viewerSpace });
-}*/
-      
-
+    
       const arButton = ARButton.createButton(renderer, {
-        requiredFeatures: ["hit-test"]
+       requiredFeatures: ["hit-test"],
       });
 
       const handleARSession = () => {
@@ -113,35 +104,30 @@ export const Scene: React.FC = () => {
       };
       arButton.addEventListener("click", handleARSession);
 
-      //const session = renderer.xr.getSession();
-      //const referenceSpace = renderer.xr.getReferenceSpace();
-
-
       const handleSelect = () => {
-        //const { current: renderer } = rendererRef;
-        const { current: raycaster } = raycasterRef;
-        //const { current: camera } = cameraRef;
+      
+        const raycaster = new THREE.Raycaster();
         const { current: cube } = cubeRef;
         const { current: scene } = sceneRef;
-    
-        if (scene && raycaster && cube) {
-            
-              const intersects = raycaster.intersectObjects(scene.children, true);
-              if (intersects.length > 0 && intersects[0].object === cube) {
-                cube.scale.set(
-                  cube.scale.x * 1.1,
-                  cube.scale.y * 1.1,
-                  cube.scale.z * 1.1
-                );
-      
-                setIsMuted((isMuted) => !isMuted);
-      
-                console.log("fff");
-              }
-            
-         
-           
+
+        const touchOrigin = new THREE.Vector3().setFromMatrixPosition(controller.matrixWorld);
+        const cameraPosition = new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld);
+        const directionFromCamera = touchOrigin.clone().sub(cameraPosition).normalize();
         
+        raycaster.set(cameraPosition, directionFromCamera);
+
+        if (scene && raycaster && cube) {
+        
+          const intersects = raycaster.intersectObjects(scene.children, true);
+          if (intersects.length > 0 && intersects[0].object === cube) {
+            cube.scale.set(
+              cube.scale.x * 1.1,
+              cube.scale.y * 1.1,
+              cube.scale.z * 1.1
+            );
+
+            setIsMuted((isMuted) => !isMuted);
+          }
         }
       };
 
