@@ -91,6 +91,21 @@ export const Scene: React.FC = () => {
        requiredFeatures: ["hit-test"],
       });
 
+      if ('xr' in navigator) {
+        
+        navigator.xr && navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+          if (supported) {
+            arButton.style.backgroundColor = '#44F84B';
+          } else {
+            arButton.style.backgroundColor = '#E8111B';
+          }
+        }).catch((error) => {
+          console.error('Error checking AR support:', error);
+        });
+      } else {
+        arButton.style.backgroundColor = 'red';
+      }
+
       const handleARSession = () => {
         const { current: scene } = sceneRef;
         const { current: cube } = cubeRef;
@@ -113,7 +128,7 @@ export const Scene: React.FC = () => {
         const touchOrigin = new THREE.Vector3().setFromMatrixPosition(controller.matrixWorld);
         const cameraPosition = new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld);
         const directionFromCamera = touchOrigin.clone().sub(cameraPosition).normalize();
-        
+
         raycaster.set(cameraPosition, directionFromCamera);
 
         if (scene && raycaster && cube) {
