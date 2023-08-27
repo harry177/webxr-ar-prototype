@@ -1,0 +1,8 @@
+.scene-container {
+    width: inherit;
+    height: inherit;
+}
+
+.video-texture {
+    display: none;
+}
